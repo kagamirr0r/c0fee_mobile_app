@@ -1,9 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'models/weather.dart';
-import 'package:http/http.dart' as http;
 
-void main() {
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+import '/widgets/welcome.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -13,75 +20,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'C0fee',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'C0fee'),
     );
-  }
-}
-
-Future<Weather> fetchWeather() async {
-  const place = 'Kyoto';
-
-  var url = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?q=$place&appid={token}&lang=ja');
-
-  var res = await http.get(url);
-
-  if (res.statusCode == 200) {
-    var body = res.body;
-    var json = jsonDecode(body);
-    var model = Weather.fromJson(json);
-
-    return model;
-  } else {
-    throw Exception('Failed to load weather');
-  }
-}
-
-class WeatherNews extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("WeatherNews"),
-        ),
-        drawer: Drawer(
-            backgroundColor: Colors.white,
-            child: ListView(children: [
-              ListTile(
-                  title: Text('Home',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) {
-                        return const MyHomePage(
-                            title: 'Flutter Demo Home Page');
-                      }),
-                    );
-                  }),
-            ])),
-        body: FutureBuilder(
-            future: fetchWeather(),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-              if (snapshot.hasData) {
-                // Data fetched successfully, display your data here
-                return Center(
-                    child: Text(
-                        snapshot.data.place + 'は' + snapshot.data.description,
-                        style: TextStyle(fontSize: 24)));
-              } else if (snapshot.hasError) {
-                // If something went wrong
-                return Text('Something went wrong...');
-              }
-              // While fetching, show a loading spinner.
-              return Center(child: CircularProgressIndicator());
-            }));
   }
 }
 
@@ -95,56 +39,93 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  // 入力したメールアドレス・パスワード
+  String _email = '';
+  String _password = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      drawer: Drawer(
-          backgroundColor: Colors.white,
-          child: ListView(children: [
-            ListTile(
-                title: Text('WeatherNews',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16)),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return WeatherNews();
-                    }),
-                  );
-                }),
-          ])),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // 1行目 メールアドレス入力用テキストフィールド
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'メールアドレス'),
+                onChanged: (String value) {
+                  setState(() {
+                    _email = value;
+                  });
+                },
+              ),
+              // 2行目 パスワード入力用テキストフィールド
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'パスワード'),
+                obscureText: true,
+                onChanged: (String value) {
+                  setState(() {
+                    _password = value;
+                  });
+                },
+              ),
+              // 3行目 ユーザ登録ボタン
+              ElevatedButton(
+                child: const Text('ユーザ登録'),
+                onPressed: () async {
+                  try {
+                    final User? user = (await FirebaseAuth.instance
+                            .createUserWithEmailAndPassword(
+                                email: _email, password: _password))
+                        .user;
+                    if (user != null) {
+                      print(user);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) {
+                          return Welcome();
+                        }),
+                      );
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+              ),
+              // 4行目 ログインボタン
+              // ElevatedButton(
+              //   child: const Text('ログイン'),
+              //   onPressed: () async {
+              //     try {
+              //       // メール/パスワードでログイン
+              //       final User? user = (await FirebaseAuth.instance
+              //               .signInWithEmailAndPassword(
+              //                   email: _email, password: _password))
+              //           .user;
+              //       if (user != null)
+              //         print("ログインしました　${user.email} , ${user.uid}");
+              //     } catch (e) {
+              //       print(e);
+              //     }
+              //   },
+              // ),
+              // // 5行目 パスワードリセット登録ボタン
+              // ElevatedButton(
+              //     child: const Text('パスワードリセット'),
+              //     onPressed: () async {
+              //       try {
+              //         await FirebaseAuth.instance
+              //             .sendPasswordResetEmail(email: _email);
+              //         print("パスワードリセット用のメールを送信しました");
+              //       } catch (e) {
+              //         print(e);
+              //       }
+              //     }),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
