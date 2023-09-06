@@ -4,14 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '/widgets/welcome.dart';
 
-class SignUp extends StatefulWidget {
-  const SignUp({Key? key}) : super(key: key);
+class SignIn extends StatefulWidget {
+  const SignIn({Key? key}) : super(key: key);
 
   @override
-  State<SignUp> createState() => _SignUpState();
+  State<SignIn> createState() => _SignInState();
 }
 
-class _SignUpState extends State<SignUp> {
+class _SignInState extends State<SignIn> {
   // 入力したメールアドレス・パスワード
   String _email = '';
   String _password = '';
@@ -66,6 +66,35 @@ class _SignUpState extends State<SignUp> {
                   }
                 },
               ),
+              // 4行目 ログインボタン
+              // ElevatedButton(
+              //   child: const Text('ログイン'),
+              //   onPressed: () async {
+              //     try {
+              //       // メール/パスワードでログイン
+              //       final User? user = (await FirebaseAuth.instance
+              //               .signInWithEmailAndPassword(
+              //                   email: _email, password: _password))
+              //           .user;
+              //       if (user != null)
+              //         print("ログインしました　${user.email} , ${user.uid}");
+              //     } catch (e) {
+              //       print(e);
+              //     }
+              //   },
+              // ),
+              // // 5行目 パスワードリセット登録ボタン
+              // ElevatedButton(
+              //     child: const Text('パスワードリセット'),
+              //     onPressed: () async {
+              //       try {
+              //         await FirebaseAuth.instance
+              //             .sendPasswordResetEmail(email: _email);
+              //         print("パスワードリセット用のメールを送信しました");
+              //       } catch (e) {
+              //         print(e);
+              //       }
+              //     }),
             ],
           ),
         ),
