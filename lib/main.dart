@@ -46,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red[900],
+      backgroundColor: Colors.blue,
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ElevatedButton(
-                style: ButtonStyle()
+                style: ButtonStyle(),
                 child: const Text('Sign In'),
                 onPressed: () async {
                   Navigator.of(context).push(
